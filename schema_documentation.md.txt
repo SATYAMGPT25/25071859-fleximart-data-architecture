@@ -1,0 +1,119 @@
+# FlexiMart Database Schema Documentation
+
+---
+
+## 1. Entity-Relationship Description
+
+### **ENTITY: customers**
+**Purpose:** Stores information about FlexiMart customers.
+
+**Attributes:**
+- `customer_id`: Unique identifier for each customer (Primary Key, auto-increment).  
+- `first_name`: Customer's first name.  
+- `last_name`: Customer's last name.  
+- `email`: Customer email address (Unique).  
+- `phone`: Customer contact number.  
+- `city`: City of residence.  
+- `registration_date`: Date the customer registered.
+
+**Relationships:**
+- One customer can place **many orders** → 1:M relationship with `orders` table.
+
+---
+
+### **ENTITY: products**
+**Purpose:** Stores information about products available for sale.
+
+**Attributes:**
+- `product_id`: Unique identifier for each product (Primary Key, auto-increment).  
+- `product_name`: Name of the product.  
+- `category`: Product category (e.g., Electronics, Apparel).  
+- `price`: Selling price of the product.  
+- `stock_quantity`: Number of units in stock (default 0).
+
+**Relationships:**
+- One product can appear in **many order items** → 1:M relationship with `order_items`.
+
+---
+
+### **ENTITY: orders**
+**Purpose:** Stores each order placed by a customer.
+
+**Attributes:**
+- `order_id`: Unique identifier for each order (Primary Key, auto-increment).  
+- `customer_id`: Foreign key referencing `customers(customer_id)`.  
+- `order_date`: Date the order was placed.  
+- `total_amount`: Total cost of the order.  
+- `status`: Order status (default 'Pending').
+
+**Relationships:**
+- One order can contain **many order items** → 1:M relationship with `order_items`.
+
+---
+
+### **ENTITY: order_items**
+**Purpose:** Stores detailed product information for each order.
+
+**Attributes:**
+- `order_item_id`: Unique identifier (Primary Key, auto-increment).  
+- `order_id`: Foreign key referencing `orders(order_id)`.  
+- `product_id`: Foreign key referencing `products(product_id)`.  
+- `quantity`: Number of units of the product in the order.  
+- `unit_price`: Price per unit at the time of order.  
+- `subtotal`: Total cost for this product (quantity × unit_price).
+
+**Relationships:**
+- Each order item belongs to **one order** and **one product** → M:1 with orders and products.
+
+---
+
+## 2. Normalization Explanation
+
+The FlexiMart database schema is designed in **Third Normal Form (3NF)** to eliminate redundancy and ensure data integrity.
+
+**Functional Dependencies:**
+- `customers`: `customer_id → {first_name, last_name, email, phone, city, registration_date}`  
+- `products`: `product_id → {product_name, category, price, stock_quantity}`  
+- `orders`: `order_id → {customer_id, order_date, total_amount, status}`  
+- `order_items`: `order_item_id → {order_id, product_id, quantity, unit_price, subtotal}`  
+
+**3NF Justification:**
+- Each table has a **primary key** that uniquely identifies rows.  
+- All non-key attributes are **fully functionally dependent** on the primary key.  
+- There are **no transitive dependencies**: attributes do not depend on other non-key attributes.  
+
+**Avoidance of Anomalies:**
+- **Update anomaly:** Changing a customer’s email requires updating only in `customers`, not multiple tables.  
+- **Insert anomaly:** Adding a new product does not require creating an order.  
+- **Delete anomaly:** Removing an order does not remove the customer or product data.  
+
+This design ensures **data consistency, reduces redundancy, and supports efficient analytics**.
+
+---
+
+## 3. Sample Data Representation
+
+### **customers**
+| customer_id | first_name | last_name | email             | phone        | city     | registration_date |
+|------------:|-----------|----------|-----------------|------------|---------|-----------------|
+| 1           | Satyam    | Gupta    | satyam@gmail.com | +91-9876543210 | Bilaspur | 2025-01-01      |
+| 2           | Priya     | Singh    | priya@gmail.com  | +91-9123456789 | Raipur  | 2025-02-10      |
+
+### **products**
+| product_id | product_name | category     | price  | stock_quantity |
+|------------|--------------|-------------|--------|----------------|
+| 1          | Laptop       | Electronics | 45000  | 10             |
+| 2          | Headphones   | Electronics | 1500   | 50             |
+
+### **orders**
+| order_id | customer_id | order_date  | total_amount | status   |
+|----------|------------|------------|--------------|---------|
+| 1        | 1          | 2025-03-01 | 46500        | Pending |
+| 2        | 2          | 2025-03-05 | 1500         | Shipped |
+
+### **order_items**
+| order_item_id | order_id | product_id | quantity | unit_price | subtotal |
+|---------------|---------|------------|---------|------------|---------|
+| 1             | 1       | 1          | 1       | 45000      | 45000   |
+| 2             | 1       | 2          | 1       | 1500       | 1500    |
+| 3             | 2       | 2          | 1       | 1500       | 1500    |

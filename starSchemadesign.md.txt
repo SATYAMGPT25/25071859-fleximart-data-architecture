@@ -1,0 +1,124 @@
+FlexiMart Star Schema Design
+Section 1: Schema Overview
+FACT TABLE: fact_sales
+
+Grain: One row per product per order line item (transaction-level)
+Business Process: Sales transactions
+
+Measures (Numeric Facts):
+
+quantity_sold: Number of units sold
+
+unit_price: Price per unit at time of sale
+
+discount_amount: Discount applied
+
+total_amount: Final amount (quantity_sold × unit_price - discount_amount)
+
+Foreign Keys:
+
+date_key → dim_date.date_key
+
+product_key → dim_product.product_key
+
+customer_key → dim_customer.customer_key
+
+DIMENSION TABLE: dim_date
+
+Purpose: Provides time-based analysis for facts
+Type: Conformed dimension
+
+Attributes:
+
+date_key (PK): Surrogate key, format YYYYMMDD
+
+full_date: Actual date
+
+day_of_week: Monday, Tuesday, etc.
+
+month: Numeric month (1–12)
+
+month_name: January, February, etc.
+
+quarter: Q1, Q2, Q3, Q4
+
+year: 2023, 2024, etc.
+
+is_weekend: Boolean (true if Saturday/Sunday)
+
+DIMENSION TABLE: dim_product
+
+Purpose: Stores product-related information
+Type: Conformed dimension
+
+Attributes:
+
+product_key (PK): Surrogate key (auto-increment)
+
+product_name: Product name
+
+category: Product category (Electronics, Apparel, etc.)
+
+price: Standard price
+
+stock_quantity: Current stock available
+
+specs: Optional JSON/object field for variable attributes (RAM, size, color)
+
+DIMENSION TABLE: dim_customer
+
+Purpose: Stores customer-related information
+Type: Conformed dimension
+
+Attributes:
+
+customer_key (PK): Surrogate key (auto-increment)
+
+first_name
+
+last_name
+
+email
+
+phone
+
+city
+
+registration_date
+
+Section 2: Design Decisions
+
+Granularity: Transaction line-item level ensures detailed reporting per product per order. This allows drill-down from monthly revenue to individual product sales.
+
+Surrogate Keys: Surrogate keys are used instead of natural keys to maintain consistent references in the warehouse, even if source system keys change. They simplify joins and indexing.
+
+Drill-Down and Roll-Up: Fact table linked to conformed dimensions enables aggregation at multiple levels (day → month → quarter → year; product → category; customer → city). This structure supports both detailed and summary analytics efficiently.
+
+Section 3: Sample Data Flow
+
+Source Transaction:
+
+Order #101, Customer: "John Doe", Product: "Laptop", Qty: 2, Unit Price: ₹50,000
+
+Becomes in Data Warehouse:
+
+fact_sales:
+
+date_key	product_key	customer_key	quantity_sold	unit_price	discount_amount	total_amount
+20240115	5	12	2	50000	0	100000
+
+dim_date:
+
+date_key	full_date	day_of_week	month	month_name	quarter	year	is_weekend
+20240115	2024-01-15	Monday	1	January	Q1	2024	False
+
+dim_product:
+
+product_key	product_name	category	price	stock_quantity	specs
+5	Laptop	Electronics	50000	50	{"RAM":"16GB"}
+
+dim_customer:
+
+customer_key	first_name	last_name	email	phone	city	registration_date
+12	John	Doe	john@example.com
+	+91-9876543210	Mumbai	2023-11-20

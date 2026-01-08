@@ -1,0 +1,13 @@
+FlexiMart NoSQL Analysis---
+
+Section A: Limitations of RDBMS:
+
+Relational databases like MySQL are structured with fixed schemas, which makes them less suitable for highly diverse product catalogs. For example, different products require different attributes: laptops need fields like RAM, processor, and storage, whereas shoes require size, color, and material. In a relational model, this would require multiple tables or nullable columns, leading to sparse or redundant data. Adding new product types often forces schema modifications, such as adding new columns or creating new tables, which is time-consuming and prone to errors. Furthermore, storing customer reviews is inefficient because reviews are nested and vary per product; normalizing this data into separate tables can complicate queries and degrade performance when retrieving all reviews for a product. Overall, frequent schema changes and heterogeneous product data make RDBMS inflexible for dynamic catalogs.
+
+Section B: NoSQL Benefits:
+
+MongoDB, a document-oriented NoSQL database, addresses these limitations with its flexible schema. Each product can be stored as a document with unique attributes, allowing laptops, shoes, and other products to coexist in the same collection without altering the schema. Reviews can be embedded directly within the product document, reducing the need for complex joins and simplifying retrieval. MongoDB’s horizontal scalability ensures the database can handle large volumes of products and high traffic by distributing data across multiple servers. Additionally, schema evolution is seamless; new product types can be added by simply inserting documents with different fields. This flexibility reduces development overhead and improves performance for diverse, evolving catalogs.
+
+Section C: Trade-offs:
+
+While MongoDB offers flexibility, it has some trade-offs compared to MySQL. First, transactions spanning multiple documents or collections are less efficient and complex, which may affect data consistency for financial or order-related operations. Second, MongoDB lacks rigid schema enforcement, increasing the risk of inconsistent or malformed data unless carefully managed through application logic or validation rules. These trade-offs mean MongoDB is ideal for flexible product data, but RDBMS may still be better for transactional consistency.
